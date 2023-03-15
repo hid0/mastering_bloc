@@ -1,3 +1,4 @@
+import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 
 void main(List<String> args) {
@@ -9,53 +10,80 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: HomePage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class CounterCubit extends Cubit<int> {
+  CounterCubit() : super(0);
 
-  Stream<int> countStream() async* {
-    for (int i = 1; 1 <= 10; i++) {
-      await Future.delayed(const Duration(seconds: 1));
-      yield i;
-    }
+  void tambahi() {
+    emit(state + 1);
   }
+
+  void kurangi() {
+    emit(state - 1);
+  }
+}
+
+class HomePage extends StatelessWidget {
+  CounterCubit mycounter = CounterCubit();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Dashboard"),
-        actions: const [],
+        title: const Text('CUBIT APP'),
       ),
-      body: StreamBuilder(
-        stream: countStream(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: Text(
-                'Loading...',
-                style: TextStyle(
-                  fontSize: 50,
-                ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          StreamBuilder(
+            stream: mycounter.stream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: Text(
+                    "Loading...",
+                    style: TextStyle(
+                      fontSize: 50,
+                    ),
+                  ),
+                );
+              } else {
+                return Center(
+                  child: Text(
+                    "${snapshot.data}",
+                    style: const TextStyle(
+                      fontSize: 50,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                onPressed: () {
+                  mycounter.kurangi();
+                },
+                icon: const Icon(Icons.remove),
               ),
-            );
-          } else {
-            return Center(
-              child: Text(
-                "${snapshot.data}",
-                style: const TextStyle(
-                  fontSize: 50,
-                ),
+              IconButton(
+                onPressed: () {
+                  mycounter.tambahi();
+                },
+                icon: const Icon(Icons.add),
               ),
-            );
-          }
-        },
+            ],
+          )
+        ],
       ),
     );
   }
